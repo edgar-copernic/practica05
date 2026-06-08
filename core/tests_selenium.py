@@ -1,7 +1,4 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from selenium.webdriver.firefox.webdriver import WebDriver
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 import os
@@ -12,15 +9,23 @@ class SecurityRegressionTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        opts = Options()
-        opts.add_argument("--headless")
 
         if os.environ.get('CI'):
-            opts.binary_location = '/usr/bin/firefox'
-            service = Service(executable_path='/usr/local/bin/geckodriver')
-            cls.selenium = WebDriver(service=service, options=opts)
+            # GitHub Actions: usar Chrome que ya viene instalado
+            from selenium.webdriver.chrome.webdriver import WebDriver as ChromeDriver
+            from selenium.webdriver.chrome.options import Options as ChromeOptions
+            opts = ChromeOptions()
+            opts.add_argument("--headless")
+            opts.add_argument("--no-sandbox")
+            opts.add_argument("--disable-dev-shm-usage")
+            cls.selenium = ChromeDriver(options=opts)
         else:
-            cls.selenium = WebDriver(options=opts)
+            # Local: usar Firefox
+            from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
+            from selenium.webdriver.firefox.options import Options as FirefoxOptions
+            opts = FirefoxOptions()
+            opts.add_argument("--headless")
+            cls.selenium = FirefoxDriver(options=opts)
 
         cls.selenium.implicitly_wait(10)
 

@@ -22,17 +22,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Install Firefox and Geckodriver
+      - name: Install Chrome
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y firefox
-          which firefox
-          firefox --version
-          curl -sL "https://github.com/mozilla/geckodriver/releases/download/v0.37.0/geckodriver-v0.37.0-linux64.tar.gz" | tar -xz
-          sudo mv geckodriver /usr/local/bin/geckodriver
-          sudo chmod +x /usr/local/bin/geckodriver
-          which geckodriver
-          geckodriver --version
+          google-chrome --version
+          chromedriver --version
 
       - name: Create test fixture
         run: |
