@@ -26,10 +26,12 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y firefox
-
-          GECKO_VER=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
-          curl -sL "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VER}/geckodriver-${GECKO_VER}-linux64.tar.gz" | tar -xz
-          sudo mv geckodriver /usr/local/bin/
+          which firefox
+          firefox --version
+          curl -sL "https://github.com/mozilla/geckodriver/releases/download/v0.37.0/geckodriver-v0.37.0-linux64.tar.gz" | tar -xz
+          sudo mv geckodriver /usr/local/bin/geckodriver
+          sudo chmod +x /usr/local/bin/geckodriver
+          which geckodriver
           geckodriver --version
 
       - name: Create test fixture

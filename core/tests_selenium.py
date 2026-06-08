@@ -1,8 +1,10 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+import os
 
 class SecurityRegressionTests(StaticLiveServerTestCase):
     fixtures = ['testdb.json']
@@ -12,7 +14,14 @@ class SecurityRegressionTests(StaticLiveServerTestCase):
         super().setUpClass()
         opts = Options()
         opts.add_argument("--headless")
-        cls.selenium = WebDriver(options=opts)
+
+        if os.environ.get('CI'):
+            opts.binary_location = '/usr/bin/firefox'
+            service = Service(executable_path='/usr/local/bin/geckodriver')
+            cls.selenium = WebDriver(service=service, options=opts)
+        else:
+            cls.selenium = WebDriver(options=opts)
+
         cls.selenium.implicitly_wait(10)
 
     @classmethod
