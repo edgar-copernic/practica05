@@ -1,0 +1,42 @@
+name: Security CI
+
+on: [push, pull_request]
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+
+    env:
+      CI: 'true'
+      MOZ_HEADLESS: '1'
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Firefox and Geckodriver
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y firefox geckodriver
+
+      - name: Create test fixture
+        run: |
+          python manage.py migrate
+          python manage.py shell -c "
+          from django.contrib.auth.models import User
+          User.objects.create_user(username='analista1', password='analista1234', is_staff=False)
+          "
+          python manage.py dumpdata auth.user \
+            --natural-foreign --natural-primary \
+            --indent 2 > core/fixtures/testdb.json
+
+      - name: Run security tests
+        run: python manage.py test core.tests_selenium --verbosity=2
